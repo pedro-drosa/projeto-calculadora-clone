@@ -2,6 +2,8 @@ class CalcController
 {
     constructor()
     {
+        this._track = new Audio('click.mp3');
+        this._sound = false;
         this._lastOperator = "";
         this._lastNumber = "";
         this._operation = [];
@@ -13,6 +15,7 @@ class CalcController
         this.initialize();
         this.initButtonsEvents();
         this.initKeyboard();
+        this.pasteFromClipboard();
     }
     initialize()
     {
@@ -22,11 +25,51 @@ class CalcController
         },1000);
         //atualizar display
         this.setLastNumberToDisplay();
+        document.querySelectorAll('.btn-ac').forEach((btn)=>{
+            btn.addEventListener('dblclick',event=>{
+                this.toggleSound();
+            });
+        });
+    }
+    //varifica se o audio está habilitado
+    toggleSound()
+    {
+        this._sound = !this._sound;
+    }
+    playSound()
+    {
+        if(this._sound){
+            //reseta o audio sempre que a função é executada
+            this._track.currentTime = 0;
+            //executa o audio 
+            this._track.play();
+        }
+    }
+    //clipboard
+    copyToClipboard()
+    {
+        let input = document.createElement('input');
+        input.value = this.displayCalc;
+        document.body.appendChild(input);
+        //seleciona o valor do input
+        input.select();
+        document.execCommand("Copy");
+        //remove o input
+        input.remove();
+    }
+    pasteFromClipboard()
+    {
+        document.addEventListener('paste',(event)=>{
+            let text = event.clipboardData.getData('Text');
+            this.displayCalc = Number.parseFloat(text);
+            console.log(text);
+        });
     }
     //eventos do teclado
     initKeyboard()
     {
         document.addEventListener('keyup',(event)=>{
+            this.playSound();
             // console.log(event.key);
             switch (event.key) {
                 case 'Escape':
@@ -62,6 +105,11 @@ class CalcController
                 case '9':
                     this.addOperation(Number.parseInt(event.key));
                     break;
+                case 'c':
+                    if (event.ctrlKey) {
+                        this.copyToClipboard();
+                    }
+                break;
             }
         });
     }
@@ -218,6 +266,7 @@ class CalcController
     }
     execBtn(value)
     {
+        this.playSound();
         switch (value) {
             case 'ac':
                 this.clearAll();
