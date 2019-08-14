@@ -149,7 +149,7 @@ class CalcController
                 this.pushOperation(value);
             }else{
                 let newValue = this.getLastOperation().toString() + value.toString();
-                this.setLastOperation(Number.parseFloat(newValue));
+                this.setLastOperation(newValue);
             //atualizar display
                 this.setLastNumberToDisplay();
             }
@@ -163,6 +163,8 @@ class CalcController
     addDot()
     {
         let lastOperation = this.getLastOperation();
+        //previnir o uso de dois pontos
+        if (typeof lastOperation === "string" && lastOperation.split('').indexOf('.') > -1) return;
         if (this.isOperator(lastOperation) || !lastOperation) {
             this.pushOperation('0.');
         }else{
